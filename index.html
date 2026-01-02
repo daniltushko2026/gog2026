@@ -2,15 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guns of Glory — Calculator</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-/* ===== BASE (MOBILE FIRST) ===== */
 body {
     margin: 0;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -19,12 +17,26 @@ body {
 }
 
 header {
-    text-align: center;
-    padding: 15px;
-    font-size: 20px;
-    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
     color: #38bdf8;
     border-bottom: 1px solid #1e293b;
+}
+
+header span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.lang-btn {
+    background: #020617;
+    border: 1px solid #334155;
+    color: #e5e7eb;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 .container {
@@ -58,7 +70,7 @@ input {
     color: #e5e7eb;
 }
 
-button {
+button.main {
     width: 100%;
     padding: 16px;
     font-size: 17px;
@@ -70,10 +82,6 @@ button {
     cursor: pointer;
 }
 
-button:active {
-    transform: scale(0.98);
-}
-
 .result {
     margin-top: 10px;
     font-size: 16px;
@@ -83,29 +91,11 @@ button:active {
 
 /* ===== PC VERSION ===== */
 @media (min-width: 768px) {
-
-    header {
-        font-size: 26px;
-        padding: 20px;
-    }
-
-    .container {
-        max-width: 900px;
-    }
-
+    .container { max-width: 900px; }
     .grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
-    }
-
-    .block {
-        margin-bottom: 0;
-    }
-
-    button {
-        font-size: 18px;
-        padding: 18px;
     }
 }
 </style>
@@ -113,37 +103,79 @@ button:active {
 
 <body>
 
-<header>⏱ Guns of Glory — Калькулятор ускорений</header>
+<header>
+    <span id="title">Guns of Glory — Калькулятор</span>
+    <button class="lang-btn" onclick="toggleLang()">RU / EN</button>
+</header>
 
 <div class="container">
-
     <div class="grid">
 
         <div class="block">
-            <h2>📅 Время одного цикла</h2>
+            <h2 id="cycleTitle">📅 Время одного цикла</h2>
             <input id="days" type="number" placeholder="Дни">
             <input id="hours" type="number" placeholder="Часы">
             <input id="minutes" type="number" placeholder="Минуты">
         </div>
 
         <div class="block">
-            <h2>⚡ Ускорения в наличии</h2>
+            <h2 id="speedTitle">⚡ Ускорения в наличии</h2>
             <input id="speedDays" type="number" placeholder="Дней ускорений">
             <input id="speedHours" type="number" placeholder="Часов ускорений">
         </div>
 
         <div class="block">
-            <h2>🪖 Войска</h2>
+            <h2 id="troopsTitle">🪖 Войска</h2>
             <input id="troopsPerCycle" type="number" placeholder="Войск за 1 цикл">
-            <button onclick="calculate()">Рассчитать</button>
+            <button class="main" onclick="calculate()" id="calcBtn">Рассчитать</button>
             <div class="result" id="result"></div>
         </div>
 
     </div>
-
 </div>
 
 <script>
+let lang = "ru";
+
+const text = {
+    ru: {
+        title: "Guns of Glory — Калькулятор",
+        cycle: "📅 Время одного цикла",
+        speed: "⚡ Ускорения в наличии",
+        troops: "🪖 Войска",
+        calc: "Рассчитать",
+        error: "❌ Укажи корректное время цикла",
+        cycles: "🔁 Полных циклов",
+        total: "🪖 Всего войск"
+    },
+    en: {
+        title: "Guns of Glory — Calculator",
+        cycle: "📅 Cycle time",
+        speed: "⚡ Available speedups",
+        troops: "🪖 Troops",
+        calc: "Calculate",
+        error: "❌ Enter valid cycle time",
+        cycles: "🔁 Full cycles",
+        total: "🪖 Total troops"
+    }
+};
+
+function toggleLang() {
+    lang = lang === "ru" ? "en" : "ru";
+    applyLang();
+}
+
+function applyLang() {
+    document.documentElement.lang = lang;
+    title.innerText = text[lang].title;
+    cycleTitle.innerText = text[lang].cycle;
+    speedTitle.innerText = text[lang].speed;
+    troopsTitle.innerText = text[lang].troops;
+    calcBtn.innerText = text[lang].calc;
+}
+
+applyLang();
+
 function calculate() {
     const d = Number(days.value || 0);
     const h = Number(hours.value || 0);
@@ -151,7 +183,7 @@ function calculate() {
 
     const cycleMinutes = d * 1440 + h * 60 + m;
     if (cycleMinutes <= 0) {
-        result.innerText = "❌ Укажи время цикла";
+        result.innerText = text[lang].error;
         return;
     }
 
@@ -160,15 +192,14 @@ function calculate() {
     const availableMinutes = sd * 1440 + sh * 60;
 
     const cycles = Math.floor(availableMinutes / cycleMinutes);
-
     const troops = Number(troopsPerCycle.value || 0);
-    const totalTroops = cycles * troops;
 
     result.innerText =
-        `🔁 Полных циклов: ${cycles}\n` +
-        `🪖 Всего войск: ${totalTroops}`;
+        `${text[lang].cycles}: ${cycles}\n` +
+        `${text[lang].total}: ${cycles * troops}`;
 }
 </script>
 
 </body>
 </html>
+
