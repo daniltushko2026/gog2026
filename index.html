@@ -83,13 +83,13 @@ button.main {
 }
 
 .result {
-    margin-top: 10px;
+    margin-top: 12px;
     font-size: 16px;
     white-space: pre-line;
     color: #22c55e;
 }
 
-/* ===== PC VERSION ===== */
+/* PC */
 @media (min-width: 768px) {
     .container { max-width: 900px; }
     .grid {
@@ -109,29 +109,34 @@ button.main {
 </header>
 
 <div class="container">
-    <div class="grid">
+<div class="grid">
 
-        <div class="block">
-            <h2 id="cycleTitle">📅 Время одного цикла</h2>
-            <input id="days" type="number" placeholder="Дни">
-            <input id="hours" type="number" placeholder="Часы">
-            <input id="minutes" type="number" placeholder="Минуты">
-        </div>
-
-        <div class="block">
-            <h2 id="speedTitle">⚡ Ускорения в наличии</h2>
-            <input id="speedDays" type="number" placeholder="Дней ускорений">
-            <input id="speedHours" type="number" placeholder="Часов ускорений">
-        </div>
-
-        <div class="block">
-            <h2 id="troopsTitle">🪖 Войска</h2>
-            <input id="troopsPerCycle" type="number" placeholder="Войск за 1 цикл">
-            <button class="main" onclick="calculate()" id="calcBtn">Рассчитать</button>
-            <div class="result" id="result"></div>
-        </div>
-
+    <!-- CYCLE TIME -->
+    <div class="block">
+        <h2 id="cycleTitle">📅 Время одного цикла</h2>
+        <input id="days" type="number" placeholder="Дни">
+        <input id="hours" type="number" placeholder="Часы">
+        <input id="minutes" type="number" placeholder="Минуты">
     </div>
+
+    <!-- SPEEDUPS -->
+    <div class="block">
+        <h2 id="speedTitle">⚡ Ускорения в наличии</h2>
+        <input id="speedDays" type="number" placeholder="Дней ускорений">
+        <input id="speedHours" type="number" placeholder="Часов ускорений">
+        <input id="speedMinutes" type="number" placeholder="Минут ускорений">
+    </div>
+
+    <!-- TROOPS -->
+    <div class="block">
+        <h2 id="troopsTitle">🪖 Войска</h2>
+        <input id="troopsPerCycle" type="number" placeholder="Войск за 1 цикл">
+        <input id="powerPerTroop" type="number" placeholder="Сила 1 солдата">
+        <button class="main" onclick="calculate()" id="calcBtn">Рассчитать</button>
+        <div class="result" id="result"></div>
+    </div>
+
+</div>
 </div>
 
 <script>
@@ -146,7 +151,8 @@ const text = {
         calc: "Рассчитать",
         error: "❌ Укажи корректное время цикла",
         cycles: "🔁 Полных циклов",
-        total: "🪖 Всего войск"
+        totalTroops: "🪖 Всего войск",
+        power: "⚔ Общая сила армии"
     },
     en: {
         title: "Guns of Glory — Calculator",
@@ -156,7 +162,8 @@ const text = {
         calc: "Calculate",
         error: "❌ Enter valid cycle time",
         cycles: "🔁 Full cycles",
-        total: "🪖 Total troops"
+        totalTroops: "🪖 Total troops",
+        power: "⚔ Total army power"
     }
 };
 
@@ -176,6 +183,11 @@ function applyLang() {
 
 applyLang();
 
+// формат чисел: 1 234 567
+function formatNumber(num) {
+    return num.toLocaleString("ru-RU");
+}
+
 function calculate() {
     const d = Number(days.value || 0);
     const h = Number(hours.value || 0);
@@ -189,17 +201,24 @@ function calculate() {
 
     const sd = Number(speedDays.value || 0);
     const sh = Number(speedHours.value || 0);
-    const availableMinutes = sd * 1440 + sh * 60;
+    const sm = Number(speedMinutes.value || 0);
+
+    const availableMinutes = sd * 1440 + sh * 60 + sm;
 
     const cycles = Math.floor(availableMinutes / cycleMinutes);
-    const troops = Number(troopsPerCycle.value || 0);
+
+    const troopsPer = Number(troopsPerCycle.value || 0);
+    const totalTroops = cycles * troopsPer;
+
+    const powerPer = Number(powerPerTroop.value || 0);
+    const totalPower = totalTroops * powerPer;
 
     result.innerText =
-        `${text[lang].cycles}: ${cycles}\n` +
-        `${text[lang].total}: ${cycles * troops}`;
+        `${text[lang].cycles}: ${formatNumber(cycles)}\n` +
+        `${text[lang].totalTroops}: ${formatNumber(totalTroops)}\n` +
+        `${text[lang].power}: ${formatNumber(totalPower)}`;
 }
 </script>
 
 </body>
 </html>
-
